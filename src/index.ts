@@ -14,9 +14,9 @@ app.use(express.json());
 app.use(cors());
 
 const pool = mariadb.createPool({
-  host: "sql7.freesqldatabase.com",
-  user: "sql7572701",
-  password: "5KBTZfAcaW",
+  host: process.env.SQL_HOST,
+  user: process.env.SQL_USER,
+  password: process.env.SQL_PASSWORD,
   // connectionLimit: 5,
 });
 
