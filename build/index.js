@@ -48,6 +48,8 @@ app.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         conn === null || conn === void 0 ? void 0 : conn.destroy();
     }
 }));
+//    "build": "rimraf ./build && tsc",
+//    "start": "npm run build && node build/index.js",
 app.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let conn;
     try {
