@@ -22,48 +22,42 @@ const app = (0, express_1.default)();
 app.use(express_1.default.urlencoded({ extended: false }));
 app.use(express_1.default.json());
 app.use((0, cors_1.default)());
-// const pool = mariadb.createPool({
-//   host: process.env.SQL_HOST,
-//   user: process.env.SQL_USER,
-//   password: process.env.SQL_PASSWORD,
-//   // connectionLimit: 5,
-// });
 const pool2 = mysql_1.default.createPool({
     host: process.env.MYSQL_HOST,
     port: Number(process.env.MYSQL_PORT),
     user: process.env.MYSQL_USER,
     password: process.env.MYSQL_PASSWORD,
     database: process.env.MYSQL_DB,
-    connectionLimit: 100,
-    multipleStatements: false,
+    // connectionLimit: 1000,
+    multipleStatements: true,
 });
-// app.get("/", async (req: Request, res: Response) => {
-//   let conn;
-//   try {
-//     conn = await pool.getConnection();
-//     const products = await conn.query("	SELECT * FROM sql7572701.Product;");
-//     // const productCopies = await conn.query(
-//     //   "	SELECT * FROM sql7572701.ProductCopy;"
-//     // );
-//     res.status(200).json({
-//       products,
-//     });
-//   } catch (error) {
-//     console.log(error);
-//     res.sendStatus(500);
-//   } finally {
-//     conn?.destroy();
-//   }
-// });
 app.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        pool2.query("SELECT * FROM Product;", (error, response) => {
-            if (res)
-                res.status(200).json({
-                    products: response,
+        // pool2.query("SELECT * FROM Product;", (error, response) => {
+        //   if (response)
+        //     res.status(200).json({
+        //       products: response,
+        //     });
+        //   else if (error) {
+        //     console.log(error);
+        //     res.sendStatus(400);
+        //   }
+        // });
+        pool2.getConnection((err, conn) => {
+            if (conn) {
+                conn.query("SELECT * FROM Product;", (error, response) => {
+                    if (response)
+                        res.status(200).json({
+                            products: response,
+                        });
+                    else {
+                        conn.destroy();
+                        throw new Error(error === null || error === void 0 ? void 0 : error.message);
+                    }
                 });
-            if (error)
-                res.sendStatus(400);
+            }
+            else
+                throw new Error(err.message);
         });
     }
     catch (error) {
@@ -73,35 +67,6 @@ app.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 }));
 //    "build": "rimraf ./build && tsc",
 //    "start": "npm run build && node build/index.js",
-// app.post("/", async (req: Request<{}, {}, Product>, res: Response) => {
-//   let conn;
-//   try {
-//     const { SKU, name, price, type, size, weight, dimension } = req.body;
-//     // Create connection
-//     conn = await pool.getConnection();
-//     //Check if SKU exists
-//     const count = await conn.query(`SELECT * FROM sql7572701.Product AS P
-//     WHERE P.SKU = '${SKU}' `);
-//     // If SKU exists , dont create product-type with code of SKU
-//     if (count[0] === undefined) {
-//       await conn.query(
-//         `INSERT INTO sql7572701.Product
-//         VALUES ('${SKU}','${name}',${price},'${type}',${size},${weight},'${dimension}')`
-//       );
-//       res.sendStatus(200);
-//     } else {
-//       res.sendStatus(400);
-//     }
-//     // Create product copy with SKU
-//     // await conn.query(`INSERT INTO sql7572701.ProductCopy (\`ProductCopySKU\`)
-//     // VALUES ('${SKU}')`);
-//   } catch (error) {
-//     console.log(error);
-//     res.sendStatus(500);
-//   } finally {
-//     conn?.destroy();
-//   }
-// });
 app.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { SKU, name, price, type, size, weight, dimension } = req.body;
@@ -128,32 +93,6 @@ app.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.sendStatus(500);
     }
 }));
-// app.put(
-//   "/",
-//   async (req: Request<{}, {}, { deleteIds: string[] }>, res: Response) => {
-//     let conn;
-//     try {
-//       const { deleteIds } = req.body;
-//       conn = await pool.getConnection();
-//       if (deleteIds.length === 0) {
-//         res.sendStatus(400);
-//         return;
-//       }
-//       let query = "DELETE FROM sql7572701.Product WHERE";
-//       deleteIds.forEach((id) => {
-//         query += " SKU='" + id + "' OR";
-//       });
-//       query = query.slice(0, query.length - 2);
-//       await conn.query(query);
-//       res.sendStatus(200);
-//     } catch (error) {
-//       console.log(error);
-//       res.sendStatus(500);
-//     } finally {
-//       conn?.destroy();
-//     }
-//   }
-// );
 app.put("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { deleteIds } = req.body;
@@ -179,4 +118,6 @@ app.put("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 }));
 const port = process.env.PORT || 5000;
-http_1.default.createServer(app).listen(port);
+http_1.default
+    .createServer(app)
+    .listen(port, () => console.log(`Listening on port ${port}`));
