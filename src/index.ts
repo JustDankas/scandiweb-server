@@ -47,6 +47,7 @@ interface Product {
   weight: number;
   dimension: string;
 }
+//    "start": "npm run build && node build/index.js",
 
 app.post("/", async (req: Request<{}, {}, Product>, res: Response) => {
   let conn;
