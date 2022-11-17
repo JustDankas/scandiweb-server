@@ -29,13 +29,13 @@ app.use((0, cors_1.default)());
 //   // connectionLimit: 5,
 // });
 const pool2 = mysql_1.default.createPool({
-    host: "db4free.net",
-    port: 3306,
-    user: "justdankas",
-    password: "5KBTZfAcaW",
-    database: "productsdb2022",
+    host: process.env.MYSQL_HOST,
+    port: Number(process.env.MYSQL_PORT),
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASSWORD,
+    database: process.env.MYSQL_DB,
     connectionLimit: 100,
-    multipleStatements: true,
+    multipleStatements: false,
 });
 // app.get("/", async (req: Request, res: Response) => {
 //   let conn;
