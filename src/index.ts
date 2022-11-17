@@ -3,7 +3,6 @@ import http from "http";
 import mariadb from "mariadb";
 import dotenv from "dotenv";
 import cors from "cors";
-import { Console } from "console";
 
 dotenv.config();
 
