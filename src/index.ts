@@ -23,30 +23,30 @@ const pool2 = mysql.createPool({
 
 app.get("/", async (req: Request, res: Response) => {
   try {
-    // pool2.query("SELECT * FROM Product;", (error, response) => {
-    //   if (response)
-    //     res.status(200).json({
-    //       products: response,
-    //     });
-    //   else if (error) {
-    //     console.log(error);
-    //     res.sendStatus(400);
-    //   }
-    // });
-    pool2.getConnection((err, conn) => {
-      if (conn) {
-        conn.query("SELECT * FROM Product;", (error, response) => {
-          conn.release();
-          if (response)
-            res.status(200).json({
-              products: response,
-            });
-          else {
-            throw new Error(error?.message);
-          }
+    pool2.query("SELECT * FROM Product;", (error, response) => {
+      if (response)
+        res.status(200).json({
+          products: response,
         });
-      } else throw new Error(err.message);
+      else if (error) {
+        console.log(error);
+        res.sendStatus(400);
+      }
     });
+    // pool2.getConnection((err, conn) => {
+    //   if (conn) {
+    //     conn.query("SELECT * FROM Product;", (error, response) => {
+    //       conn.release();
+    //       if (response)
+    //         res.status(200).json({
+    //           products: response,
+    //         });
+    //       else {
+    //         throw new Error(error?.message);
+    //       }
+    //     });
+    //   } else throw new Error(err.message);
+    // });
   } catch (error) {
     console.log(error);
     res.sendStatus(500);
@@ -68,50 +68,49 @@ app.post("/", async (req: Request<{}, {}, Product>, res: Response) => {
   try {
     const { SKU, name, price, type, size, weight, dimension } = req.body;
     //Check if SKU exists
-    pool2.getConnection((err, conn) => {
-      if (err) throw new Error(err.message);
-      conn.query(
-        `SELECT * FROM Product AS P
-      WHERE P.SKU = '${SKU}'`,
-        (error, response) => {
-          if (response.length < 1) {
-            conn.query(
-              `INSERT INTO Product
-          VALUES ('${SKU}','${name}',${price},'${type}',${size},${weight},'${dimension}')`,
-              (err2, response2) => {
-                conn.release();
-                if (err2) {
-                  res.sendStatus(400);
-                  return;
-                }
-                if (response2) res.sendStatus(200);
-              }
-            );
-          } else {
-            conn.release();
-            res.sendStatus(400);
-          }
-        }
-      );
-    });
-    // pool2.query(
-    //   `SELECT * FROM Product AS P
-    // WHERE P.SKU = '${SKU}' `,
-    //   (error, response) => {
-    //     if (response.length < 1) {
-    //       //SKU doesnt exist , create product
-    //       pool2.query(
-    //         `INSERT INTO Product
-    //             VALUES ('${SKU}','${name}',${price},'${type}',${size},${weight},'${dimension}')`,
-    //         (error, response) => {
-    //           console.log(error);
-    //           if (response) res.sendStatus(200);
-    //           else res.sendStatus(400);
-    //         }
-    //       );
-    //     } else res.sendStatus(400);
-    //   }
-    // );
+    // pool2.getConnection((err, conn) => {
+    //   if (err) throw new Error(err.message);
+    //   conn.query(
+    //     `SELECT * FROM Product AS P
+    //   WHERE P.SKU = '${SKU}'`,
+    //     (error, response) => {
+    //       if (response.length < 1) {
+    //         conn.query(
+    //           `INSERT INTO Product
+    //       VALUES ('${SKU}','${name}',${price},'${type}',${size},${weight},'${dimension}')`,
+    //           (err2, response2) => {
+    //             conn.release();
+    //             if (err2) {
+    //               res.sendStatus(400);
+    //               return;
+    //             }
+    //             if (response2) res.sendStatus(200);
+    //           }
+    //         );
+    //       } else {
+    //         conn.release();
+    //         res.sendStatus(400);
+    //       }
+    //     }
+    //   );
+    // });
+    pool2.query(
+      `SELECT * FROM Product AS P
+    WHERE P.SKU = '${SKU}' `,
+      (error, response) => {
+        if (response.length < 1) {
+          //SKU doesnt exist , create product
+          pool2.query(
+            `INSERT INTO Product
+                VALUES ('${SKU}','${name}',${price},'${type}',${size},${weight},'${dimension}')`,
+            (error, response) => {
+              if (response) res.sendStatus(200);
+              else res.sendStatus(400);
+            }
+          );
+        } else res.sendStatus(400);
+      }
+    );
   } catch (error) {
     console.log(error);
     res.sendStatus(500);
@@ -132,18 +131,18 @@ app.put(
         query += " SKU='" + id + "' OR";
       });
       query = query.slice(0, query.length - 2);
-      // pool2.query(query, (error, response) => {
-      //   if (response) res.sendStatus(200);
-      //   else res.sendStatus(400);
-      // });
-      pool2.getConnection((err, conn) => {
-        if (err) res.sendStatus(400);
-        conn.query(query, (e, response) => {
-          conn.release();
-          if (response) res.sendStatus(200);
-          else res.sendStatus(400);
-        });
+      pool2.query(query, (error, response) => {
+        if (response) res.sendStatus(200);
+        else res.sendStatus(400);
       });
+      // pool2.getConnection((err, conn) => {
+      //   if (err) res.sendStatus(400);
+      //   conn.query(query, (e, response) => {
+      //     conn.release();
+      //     if (response) res.sendStatus(200);
+      //     else res.sendStatus(400);
+      //   });
+      // });
     } catch (error) {
       console.log(error);
       res.sendStatus(500);
